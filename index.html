@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diario del Tutorato — Università degli Studi del Sannio</title>
+<style>
+  :root{
+    /* Palette istituzionale Università degli Studi del Sannio (Manuale Identità Visiva, DR 464/2018) */
+    --uns-blue:#1c2566;
+    --uns-blue-dark:#141b4d;
+    --uns-gold:#b17a22;
+
+    /* TEMA CHIARO (default) */
+    --bg:#f7f6f2;
+    --bg-card:#ffffff;
+    --bg-input:#ffffff;
+    --line:#e1ddd2;
+    --ink:#1c2233;
+    --ink-soft:#5b6478;
+    --ink-faint:#8b93a3;
+    --accent:var(--uns-gold);
+    --accent-ink:#ffffff;
+    --accent-soft:#f1e6d3;
+    --primary:var(--uns-blue);
+    --primary-soft:#e4e6f3;
+    --ok:#2f7a4f;
+    --ok-bg:#e6f2ea;
+    --warn:#a9690f;
+    --warn-bg:#f7ead7;
+    --danger:#a83b3b;
+    --danger-bg:#f6e3e1;
+    --shadow:0 2px 10px rgba(28,37,102,0.06);
+
+    --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --font-mono: 'SF Mono', 'Roboto Mono', Consolas, monospace;
+    --radius: 4px;
+  }
+  [data-theme="dark"]{
+    --bg:#0e1118;
+    --bg-card:#1a2030;
+    --bg-input:#11151f;
+    --line:#2a3145;
+    --ink:#e8eaf0;
+    --ink-soft:#9aa3b8;
+    --ink-faint:#646e85;
+    --accent:#cf9f3a;
+    --accent-ink:#1c1503;
+    --accent-soft:rgba(207,159,58,0.14);
+    --primary:#3c4ba0;
+    --primary-soft:rgba(60,75,160,0.18);
+    --ok:#3fae6b;
+    --ok-bg:rgba(63,174,107,0.13);
+    --warn:#d9883a;
+    --warn-bg:rgba(217,136,58,0.14);
+    --danger:#d65d5d;
+    --danger-bg:rgba(214,93,93,0.14);
+    --shadow:0 2px 14px rgba(0,0,0,0.4);
+  }
+
+  *{box-sizing:border-box;}
+  .tut-root{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    min-height:100vh;
+    line-height:1.5;
+    font-size:15px;
+    transition:background .2s ease, color .2s ease;
+  }
+  .tut-shell{max-width:980px;margin:0 auto;padding:24px 20px 60px;}
+
+  /* Header */
+  .tut-header{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:2px solid var(--primary);
+    padding-bottom:14px;margin-bottom:6px;flex-wrap:wrap;gap:12px;
+  }
+  .tut-title-block{display:flex;align-items:center;gap:12px;}
+  .tut-crest{
+    width:36px;height:36px;border-radius:50%;background:var(--primary);border:1.5px solid var(--accent);
+    display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;
+    color:var(--accent);font-size:14px;flex-shrink:0;
+  }
+  .tut-title{
+    font-family:var(--font-display);
+    font-size:25px;font-weight:600;letter-spacing:0.2px;margin:0;color:var(--ink);
+  }
+  .tut-subtitle{font-size:12px;color:var(--ink-soft);font-style:italic;}
+  .tut-header-right{display:flex;align-items:center;gap:12px;}
+  .tut-theme-toggle{
+    display:flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--bg-card);
+  }
+  .tut-theme-btn{
+    font-size:12px;padding:6px 13px;background:none;border:none;cursor:pointer;color:var(--ink-faint);
+    font-weight:600;
+  }
+  .tut-theme-btn.active{background:var(--primary);color:#fff;}
+
+  .tut-owner-line{
+    font-size:12.5px;color:var(--ink-soft);margin:6px 0 22px;
+    padding-bottom:14px;border-bottom:1px solid var(--line);
+  }
+  .tut-owner-line strong{color:var(--ink);}
+
+  /* Nav tabs */
+  .tut-nav{display:flex;gap:4px;margin-bottom:22px;border-bottom:1px solid var(--line);}
+  .tut-tab{
+    font-family:var(--font-body);font-size:13.5px;font-weight:600;color:var(--ink-soft);
+    padding:9px 16px;background:none;border:none;cursor:pointer;border-bottom:2.5px solid transparent;
+    margin-bottom:-1px;
+  }
+  .tut-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+  .tut-panel{display:none;}
+  .tut-panel.active{display:block;}
+
+  /* Section heading */
+  .tut-sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .tut-sec-title{font-family:var(--font-display);font-size:19px;font-weight:600;margin:0;color:var(--ink);}
+  .tut-sec-note{font-size:12px;color:var(--ink-faint);}
+
+  /* Buttons */
+  .tut-btn{
+    font-family:var(--font-body);font-size:13px;font-weight:600;
+    padding:8px 16px;border-radius:var(--radius);cursor:pointer;border:1px solid var(--line);
+    background:var(--bg-card);color:var(--ink);transition:transform .04s ease, background .15s ease;
+  }
+  .tut-btn:hover{filter:brightness(0.97);}
+  [data-theme="dark"] .tut-btn:hover{filter:brightness(1.15);}
+  .tut-btn:active{transform:scale(0.98);}
+  .tut-btn-primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .tut-btn-accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+  .tut-btn-ghost{border-color:var(--line);color:var(--ink-soft);background:transparent;}
+  .tut-btn-danger{border-color:var(--danger);color:var(--danger);background:transparent;}
+  .tut-btn-danger:hover{background:var(--danger-bg);}
+  .tut-btn-warn{border-color:var(--warn);color:var(--warn);background:transparent;}
+  .tut-btn-warn:hover{background:var(--warn-bg);}
+  .tut-btn-sm{padding:5px 10px;font-size:12px;}
+  .tut-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+  /* Cards */
+  .tut-card{
+    background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow);
+  }
+
+  /* Form elements */
+  .tut-field{margin-bottom:12px;}
+  .tut-label{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-faint);margin-bottom:5px;}
+  .tut-input, .tut-select, .tut-textarea{
+    width:100%;font-family:var(--font-body);font-size:14px;padding:9px 11px;
+    border:1px solid var(--line);border-radius:var(--radius);background:var(--bg-input);color:var(--ink);
+  }
+  .tut-input::placeholder, .tut-textarea::placeholder{color:var(--ink-faint);}
+  .tut-input:focus, .tut-select:focus, .tut-textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+  .tut-textarea{resize:vertical;min-height:64px;font-family:var(--font-body);}
+  .tut-row{display:grid;gap:12px;}
+  .tut-row-2{grid-template-columns:1fr 1fr;}
+  .tut-row-3{grid-template-columns:1fr 1fr 1fr;}
+  @media (max-width:640px){.tut-row-2,.tut-row-3{grid-template-columns:1fr;}}
+
+  /* Session list */
+  .tut-session{
+    display:grid;grid-template-columns:90px 1fr auto;gap:14px;align-items:start;
+    padding:13px 0;border-bottom:1px solid var(--line);
+  }
+  .tut-session:last-child{border-bottom:none;}
+  .tut-session-date{font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);line-height:1.4;}
+  .tut-session-date .tut-day{font-size:16px;font-weight:700;color:var(--ink);display:block;}
+  .tut-session-name{font-weight:700;font-size:14.5px;margin-bottom:2px;color:var(--ink);}
+  .tut-session-topic{font-size:13px;color:var(--ink-soft);}
+  .tut-session-meta{font-family:var(--font-mono);font-size:11px;color:var(--ink-faint);margin-top:4px;}
+  .tut-session-actions{display:flex;gap:6px;align-self:center;flex-wrap:wrap;justify-content:flex-end;}
+
+  .tut-empty{
+    text-align:center;padding:36px 20px;color:var(--ink-faint);font-size:13.5px;
+    border:1px dashed var(--line);border-radius:var(--radius);
+  }
+
+  .tut-badge{
+    display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;
+    padding:2px 7px;border-radius:2px;background:var(--primary-soft);color:var(--primary);
+  }
+  [data-theme="dark"] .tut-badge{color:#aab4ee;}
+  .tut-badge-warn{background:var(--warn-bg);color:var(--warn);}
+  .tut-badge-danger{background:var(--danger-bg);color:var(--danger);}
+
+  .tut-toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--primary);color:#fff;padding:10px 18px;border-radius:var(--radius);
+    font-size:13px;font-weight:600;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.25);
+    opacity:0;transition:opacity .25s ease;pointer-events:none;
+  }
+  .tut-toast.show{opacity:1;}
+
+  .tut-modal-bg{
+    position:fixed;inset:0;background:rgba(10,12,20,0.55);display:none;align-items:center;justify-content:center;z-index:998;padding:20px;
+  }
+  .tut-modal-bg.show{display:flex;}
+  .tut-modal{
+    background:var(--bg-card);border-radius:8px;padding:22px;max-width:440px;width:100%;
+    border:1px solid var(--line);box-shadow:0 10px 50px rgba(0,0,0,0.3);
+  }
+  .tut-modal h3{font-family:var(--font-display);margin:0 0 14px;font-size:18px;color:var(--ink);}
+  .tut-modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+
+  .tut-report-block{white-space:pre-wrap;font-family:var(--font-mono);font-size:12px;background:var(--bg-input);border:1px solid var(--line);border-radius:var(--radius);padding:14px;max-height:340px;overflow:auto;color:var(--ink-soft);}
+  .tut-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+  .tut-stat{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;text-align:center;box-shadow:var(--shadow);}
+  .tut-stat-num{font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--accent);}
+  .tut-stat-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-faint);margin-top:2px;}
+
+  .tut-loading{text-align:center;padding:40px;color:var(--ink-faint);font-size:13px;}
+
+  .tut-quickexport{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+  .tut-conn-banner{
+    font-size:12px;font-weight:600;padding:8px 14px;border-radius:var(--radius);
+    margin-bottom:16px;display:flex;align-items:center;gap:8px;
+  }
+  .tut-conn-banner.ok{background:var(--ok-bg);color:var(--ok);}
+  .tut-conn-banner.error{background:var(--danger-bg);color:var(--danger);}
+  .tut-conn-banner.connecting{background:var(--primary-soft);color:var(--primary);}
+  .tut-conn-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="tut-root" id="tutRoot" data-theme="light">
+  <div class="tut-shell">
+
+    <div class="tut-header">
+      <div class="tut-title-block">
+        <div class="tut-crest">US</div>
+        <div>
+          <h1 class="tut-title">Diario del Tutorato</h1>
+          <span class="tut-subtitle">Università degli Studi del Sannio</span>
+        </div>
+      </div>
+      <div class="tut-header-right">
+        <div class="tut-theme-toggle">
+          <button class="tut-theme-btn active" id="themeLightBtn" onclick="setTheme('light')">☀ Light</button>
+          <button class="tut-theme-btn" id="themeDarkBtn" onclick="setTheme('dark')">☾ Dark</button>
+        </div>
+      </div>
+    </div>
+    <div class="tut-owner-line">
+      Registro a cura di <strong>Dott.ssa Laura Scialò</strong> — collaboratrice del Prof. Cavuoto
+    </div>
+
+    <div id="connBanner" class="tut-conn-banner connecting">
+      <span class="tut-conn-dot"></span> <span id="connBannerText">Connessione al database in corso…</span>
+    </div>
+
+    <div class="tut-nav" id="navBar">
+      <button class="tut-tab active" data-panel="diario" onclick="setPanel('diario')">Diario sessioni</button>
+      <button class="tut-tab" data-panel="report" onclick="setPanel('report')">Report</button>
+    </div>
+
+    <div id="loadingMsg" class="tut-loading">Caricamento dati…</div>
+
+    <!-- PANEL: DIARIO -->
+    <div class="tut-panel active" id="panel-diario">
+      <div class="tut-card">
+        <div class="tut-sec-head"><h2 class="tut-sec-title" style="font-size:15px;">Registra nuova sessione</h2></div>
+        <div class="tut-row tut-row-2">
+          <div class="tut-field">
+            <label class="tut-label">Studente</label>
+            <input class="tut-input" id="f-studente" placeholder="Nome e cognome" list="studentList">
+            <datalist id="studentList"></datalist>
+          </div>
+          <div class="tut-field">
+            <label class="tut-label">Tipo</label>
+            <select class="tut-select" id="f-tipo">
+              <option value="Tutorato">Tutorato</option>
+              <option value="Tesi">Tesi / supervisione</option>
+              <option value="Esame">Preparazione esame</option>
+              <option value="Altro">Altro</option>
+            </select>
+          </div>
+        </div>
+        <div class="tut-row tut-row-3">
+          <div class="tut-field">
+            <label class="tut-label">Data</label>
+            <input class="tut-input" type="date" id="f-data">
+          </div>
+          <div class="tut-field">
+            <label class="tut-label">Orario inizio</label>
+            <input class="tut-input" type="time" id="f-ora">
+          </div>
+          <div class="tut-field">
+            <label class="tut-label">Durata (min)</label>
+            <input class="tut-input" type="number" id="f-durata" value="45" min="5" step="5">
+          </div>
+        </div>
+        <div class="tut-field">
+          <label class="tut-label">Argomenti trattati</label>
+          <textarea class="tut-textarea" id="f-argomenti" placeholder="Es. Revisione capitolo II, impostazione tesi su art. 111 Cost., correzione bozza memoria…"></textarea>
+        </div>
+        <div class="tut-field">
+          <label class="tut-label">Note (opzionale)</label>
+          <input class="tut-input" id="f-note" placeholder="Follow-up, materiali da inviare, prossimi step…">
+        </div>
+        <button class="tut-btn tut-btn-primary" onclick="addSession()">Salva sessione</button>
+      </div>
+
+      <div class="tut-sec-head" style="margin-top:22px;">
+        <h2 class="tut-sec-title">Storico sessioni</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input class="tut-input" id="filterStudente" placeholder="Filtra per studente…" style="width:180px;padding:6px 10px;font-size:12.5px;" oninput="renderSessions()">
+          <span class="tut-sec-note" id="sessionCount"></span>
+        </div>
+      </div>
+      <div id="sessionList"></div>
+    </div>
+
+    <!-- PANEL: REPORT -->
+    <div class="tut-panel" id="panel-report">
+      <div class="tut-sec-head">
+        <h2 class="tut-sec-title">Report per il Prof. Cavuoto</h2>
+      </div>
+
+      <div class="tut-card">
+        <div class="tut-sec-head" style="margin-bottom:10px;">
+          <span class="tut-sec-note" style="font-size:11.5px;">Export rapido</span>
+        </div>
+        <div class="tut-quickexport">
+          <button class="tut-btn tut-btn-ghost tut-btn-sm" onclick="setReportRange('week')">Ultima settimana</button>
+          <button class="tut-btn tut-btn-ghost tut-btn-sm" onclick="setReportRange('month')">Ultimo mese</button>
+          <button class="tut-btn tut-btn-ghost tut-btn-sm" onclick="setReportRange('all')">Tutto</button>
+          <span style="flex:1"></span>
+          <button class="tut-btn tut-btn-primary tut-btn-sm" onclick="copyReport()">📋 Copia testo</button>
+          <button class="tut-btn tut-btn-accent tut-btn-sm" onclick="downloadReportPDF()">⬇ Scarica PDF</button>
+        </div>
+        <div class="tut-row tut-row-2" style="margin-top:14px;">
+          <div class="tut-field">
+            <label class="tut-label">Dal</label>
+            <input class="tut-input" type="date" id="r-da" onchange="renderReport()">
+          </div>
+          <div class="tut-field">
+            <label class="tut-label">Al</label>
+            <input class="tut-input" type="date" id="r-a" onchange="renderReport()">
+          </div>
+        </div>
+      </div>
+
+      <div class="tut-stat-row" id="reportStats"></div>
+
+      <div class="tut-sec-head">
+        <h2 class="tut-sec-title" style="font-size:15px;">Anteprima report</h2>
+      </div>
+      <div class="tut-report-block" id="reportPreview"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="tut-modal-bg" id="modalBg">
+  <div class="tut-modal">
+    <h3 id="modalTitle">Segnala disdetta o rinvio</h3>
+    <div id="modalBody"></div>
+    <div class="tut-modal-actions">
+      <button class="tut-btn tut-btn-ghost" onclick="closeModal()">Annulla</button>
+      <button class="tut-btn tut-btn-primary" id="modalConfirmBtn">Confermo</button>
+    </div>
+  </div>
+</div>
+
+<div class="tut-toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- ============================================================ -->
+<!-- FIREBASE SDK (versione "compat", compatibile con script semplici senza build tools) -->
+<!-- ============================================================ -->
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+<script>
+/* ============================================================
+   CONFIGURAZIONE FIREBASE — già impostata per il progetto "registro-studenti"
+   ============================================================
+   Questi valori NON sono segreti come una password: sono pensati per essere
+   visibili nel codice del sito (è così che funziona qualsiasi app web con Firebase).
+   La sicurezza reale dei dati si imposta nelle "Regole" di Firestore, non qui.
+*/
+const firebaseConfig = {
+  apiKey: "AIzaSyDZwgobGcqzt6SZkbR5AgiQ2UXnfHojlAo",
+  authDomain: "registro-studenti.firebaseapp.com",
+  projectId: "registro-studenti",
+  storageBucket: "registro-studenti.firebasestorage.app",
+  messagingSenderId: "802778373696",
+  appId: "1:802778373696:web:3bdaf0437ee0a3a24189a5"
+};
+/* ============================================================ */
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+
+<script>
+(function(){
+
+  let state = { sessions: [], panel: 'diario' };
+
+  const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+  const GIORNI = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  function toast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2200);
+  }
+
+  function fmtDate(iso){
+    const d = new Date(iso + 'T00:00:00');
+    return { day: d.getDate(), mon: MESI[d.getMonth()], dow: GIORNI[d.getDay()], full: d.toLocaleDateString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric'}) };
+  }
+
+  function endTime(ora, durata){
+    const [h,m] = ora.split(':').map(Number);
+    const total = h*60+m+Number(durata);
+    const eh = Math.floor(total/60)%24, em = total%60;
+    return String(eh).padStart(2,'0')+':'+String(em).padStart(2,'0');
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- TEMA (preferenza locale al browser, non condivisa: usa localStorage) ----------
+  window.setTheme = function(theme){
+    document.getElementById('tutRoot').setAttribute('data-theme', theme);
+    document.getElementById('themeLightBtn').classList.toggle('active', theme==='light');
+    document.getElementById('themeDarkBtn').classList.toggle('active', theme==='dark');
+    try{ localStorage.setItem('tut-theme-pref', theme); }catch(e){}
+  };
+
+  function loadThemePref(){
+    try{
+      const t = localStorage.getItem('tut-theme-pref');
+      if(t === 'dark') setTheme('dark');
+    }catch(e){ /* nessuna preferenza salvata: resta light di default */ }
+  }
+
+  // ---------- NAV ----------
+  window.setPanel = function(panel){
+    state.panel = panel;
+    document.querySelectorAll('.tut-tab').forEach(b=>b.classList.toggle('active', b.dataset.panel===panel));
+    document.querySelectorAll('.tut-panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+panel));
+    if(panel==='report') renderReport();
+  };
+
+  // ---------- CONNESSIONE / STATO BANNER ----------
+  function setConnBanner(kind, text){
+    const el = document.getElementById('connBanner');
+    el.className = 'tut-conn-banner ' + kind;
+    document.getElementById('connBannerText').textContent = text;
+    if(kind === 'ok'){
+      // Nasconde il banner dopo una breve conferma, per non occupare spazio permanentemente
+      setTimeout(()=>{ el.style.display = 'none'; }, 2500);
+    } else {
+      el.style.display = 'flex';
+    }
+  }
+
+  // ---------- PERSISTENCE (Firebase Firestore) ----------
+  const sessionsCollection = db.collection('sessioni_tutorato');
+  let firestoreReady = false;
+
+  function loadAll(){
+    // Listener in tempo reale: se più persone usano il registro, ognuna vede
+    // automaticamente le modifiche fatte dall'altra, senza bisogno di ricaricare la pagina.
+    sessionsCollection.orderBy('data', 'desc').orderBy('ora', 'desc')
+      .onSnapshot(
+        (snapshot) => {
+          state.sessions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          document.getElementById('loadingMsg').style.display = 'none';
+          if(!firestoreReady){
+            firestoreReady = true;
+            setConnBanner('ok', 'Connesso al database — dati sincronizzati');
+          }
+          renderAll();
+        },
+        (error) => {
+          console.error('Errore Firestore:', error);
+          document.getElementById('loadingMsg').style.display = 'none';
+          setConnBanner('error', 'Impossibile connettersi al database. Verificare la configurazione Firebase (vedi istruzioni) e la connessione internet.');
+        }
+      );
+  }
+
+  async function saveNewSession(sessionData){
+    try{
+      await sessionsCollection.add(sessionData);
+      return true;
+    }catch(e){
+      console.error(e);
+      toast('Errore nel salvataggio. Controllare la connessione.');
+      return false;
+    }
+  }
+
+  async function updateSessionDoc(id, partialData){
+    try{
+      await sessionsCollection.doc(id).update(partialData);
+      return true;
+    }catch(e){
+      console.error(e);
+      toast('Errore nel salvataggio. Controllare la connessione.');
+      return false;
+    }
+  }
+
+  async function deleteSessionDoc(id){
+    try{
+      await sessionsCollection.doc(id).delete();
+      return true;
+    }catch(e){
+      console.error(e);
+      toast('Errore durante l\'eliminazione. Controllare la connessione.');
+      return false;
+    }
+  }
+
+  // ---------- DIARIO ----------
+  window.addSession = async function(){
+    const studente = document.getElementById('f-studente').value.trim();
+    const data = document.getElementById('f-data').value;
+    const ora = document.getElementById('f-ora').value;
+    const durata = document.getElementById('f-durata').value || 45;
+    const tipo = document.getElementById('f-tipo').value;
+    const argomenti = document.getElementById('f-argomenti').value.trim();
+    const note = document.getElementById('f-note').value.trim();
+
+    if(!studente || !data || !ora){
+      toast('Compila studente, data e orario');
+      return;
+    }
+
+    const ok = await saveNewSession({
+      studente, data, ora, durata: Number(durata), tipo, argomenti, note,
+      status: 'confermata',
+      createdAt: new Date().toISOString()
+    });
+    if(!ok) return;
+
+    document.getElementById('f-studente').value='';
+    document.getElementById('f-data').value='';
+    document.getElementById('f-ora').value='';
+    document.getElementById('f-durata').value=45;
+    document.getElementById('f-argomenti').value='';
+    document.getElementById('f-note').value='';
+
+    toast('Sessione registrata');
+    // Lo storico si aggiorna automaticamente tramite il listener in tempo reale (onSnapshot)
+  };
+
+  window.deleteSession = async function(id){
+    const ok = await deleteSessionDoc(id);
+    if(ok) toast('Sessione eliminata');
+  };
+
+  window.openCancelSessionModal = function(id){
+    const s = state.sessions.find(x=>x.id===id);
+    if(!s) return;
+    const d = fmtDate(s.data);
+    document.getElementById('modalTitle').textContent = 'Segnala disdetta o rinvio';
+    document.getElementById('modalBody').innerHTML = `
+      <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">
+        Sessione con <strong style="color:var(--ink);">${escapeHtml(s.studente)}</strong> — ${d.full} ${s.ora}
+      </p>
+      <div class="tut-field">
+        <label class="tut-label">Tipo di avviso</label>
+        <select class="tut-select" id="cs-tipo">
+          <option value="disdetta">Disdetta (non si è tenuta)</option>
+          <option value="rinvio">Rinvio / posticipo</option>
+        </select>
+      </div>
+      <div class="tut-field">
+        <label class="tut-label">Motivo (opzionale)</label>
+        <input class="tut-input" id="cs-motivo" placeholder="Es. Impegno improvviso, sovrapposizione con altro esame…">
+      </div>
+    `;
+    document.getElementById('modalConfirmBtn').onclick = async function(){
+      const tipo = document.getElementById('cs-tipo').value;
+      const motivo = document.getElementById('cs-motivo').value.trim();
+      const newStatus = tipo === 'disdetta' ? 'disdetta' : 'rinvio';
+      const newNote = motivo ? (s.note ? s.note + ' — ' : '') + 'Motivo ' + (tipo==='disdetta'?'disdetta':'rinvio') + ': ' + motivo : s.note;
+      const ok = await updateSessionDoc(id, { status: newStatus, note: newNote || '' });
+      if(ok){
+        closeModal();
+        toast('Stato aggiornato');
+      }
+    };
+    document.getElementById('modalBg').classList.add('show');
+  };
+
+  window.markConfirmed = async function(id){
+    const ok = await updateSessionDoc(id, { status: 'confermata' });
+    if(ok) toast('Sessione ripristinata come confermata');
+  };
+
+  function renderStudentList(){
+    const names = [...new Set(state.sessions.map(s=>s.studente))];
+    document.getElementById('studentList').innerHTML = names.map(n=>`<option value="${escapeHtml(n)}">`).join('');
+  }
+
+  function statusBadge(status){
+    if(status === 'disdetta') return '<span class="tut-badge tut-badge-danger">Disdetta</span>';
+    if(status === 'rinvio') return '<span class="tut-badge tut-badge-warn">Rinvio</span>';
+    return '';
+  }
+
+  function renderSessions(){
+    const filter = (document.getElementById('filterStudente').value||'').toLowerCase();
+    const list = document.getElementById('sessionList');
+    const filtered = state.sessions.filter(s=>s.studente.toLowerCase().includes(filter));
+    document.getElementById('sessionCount').textContent = filtered.length + (filtered.length===1?' sessione':' sessioni');
+
+    if(filtered.length===0){
+      list.innerHTML = '<div class="tut-empty">Nessuna sessione registrata' + (filter?' per questo studente':'.') + '</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map(s=>{
+      const d = fmtDate(s.data);
+      const canCancel = s.status === 'confermata' || !s.status;
+      return `
+      <div class="tut-card">
+        <div class="tut-session">
+          <div class="tut-session-date"><span class="tut-day">${d.day}</span>${d.mon} · ${d.dow}</div>
+          <div>
+            <div class="tut-session-name">${escapeHtml(s.studente)} <span class="tut-badge">${escapeHtml(s.tipo||'Tutorato')}</span> ${statusBadge(s.status)}</div>
+            <div class="tut-session-topic">${escapeHtml(s.argomenti||'—')}</div>
+            ${s.note?`<div class="tut-session-meta">Note: ${escapeHtml(s.note)}</div>`:''}
+            <div class="tut-session-meta">${s.ora} – ${endTime(s.ora,s.durata)} (${s.durata} min)</div>
+          </div>
+          <div class="tut-session-actions">
+            ${canCancel?`<button class="tut-btn tut-btn-warn tut-btn-sm" onclick="openCancelSessionModal('${s.id}')">Disdici/rinvia</button>`:`<button class="tut-btn tut-btn-ghost tut-btn-sm" onclick="markConfirmed('${s.id}')">Ripristina</button>`}
+            <button class="tut-btn tut-btn-danger tut-btn-sm" onclick="deleteSession('${s.id}')">Elimina</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  window.closeModal = function(){
+    document.getElementById('modalBg').classList.remove('show');
+  };
+
+  // ---------- REPORT ----------
+  window.setReportRange = function(kind){
+    const today = new Date();
+    const toStr = d => d.toISOString().slice(0,10);
+    if(kind==='week'){
+      const from = new Date(today); from.setDate(today.getDate()-7);
+      document.getElementById('r-da').value = toStr(from);
+      document.getElementById('r-a').value = toStr(today);
+    } else if(kind==='month'){
+      const from = new Date(today); from.setMonth(today.getMonth()-1);
+      document.getElementById('r-da').value = toStr(from);
+      document.getElementById('r-a').value = toStr(today);
+    } else {
+      document.getElementById('r-da').value = '';
+      document.getElementById('r-a').value = '';
+    }
+    renderReport();
+  };
+
+  function getFilteredSessions(){
+    const from = document.getElementById('r-da').value;
+    const to = document.getElementById('r-a').value;
+    return state.sessions.filter(s=>{
+      if(from && s.data < from) return false;
+      if(to && s.data > to) return false;
+      return true;
+    }).sort((a,b)=> (a.data+a.ora) < (b.data+b.ora) ? -1 : 1);
+  }
+
+  function buildReportText(){
+    const sessions = getFilteredSessions();
+    const from = document.getElementById('r-da').value;
+    const to = document.getElementById('r-a').value;
+    const periodo = (from||to) ? `${from?fmtDate(from).full:'inizio'} – ${to?fmtDate(to).full:'oggi'}` : 'tutto il periodo registrato';
+
+    const totMin = sessions.reduce((acc,s)=>acc+Number(s.durata),0);
+    const studenti = [...new Set(sessions.map(s=>s.studente))];
+    const annullate = sessions.filter(s=>s.status==='disdetta'||s.status==='rinvio').length;
+
+    let txt = `REPORT ATTIVITÀ DI TUTORATO\n`;
+    txt += `Università degli Studi del Sannio\n`;
+    txt += `A cura di: Dott.ssa Laura Scialò (collaboratrice del Prof. Cavuoto)\n`;
+    txt += `Periodo: ${periodo}\n`;
+    txt += `Destinatario: Prof. Cavuoto\n`;
+    txt += `Generato il: ${new Date().toLocaleDateString('it-IT')}\n`;
+    txt += `${'='.repeat(60)}\n\n`;
+    txt += `Sintesi: ${sessions.length} sessioni · ${studenti.length} studenti · ${(totMin/60).toFixed(1)} ore totali`;
+    if(annullate>0) txt += ` · ${annullate} disdette/rinvii`;
+    txt += `\n\n`;
+
+    studenti.forEach(stu=>{
+      const sue = sessions.filter(s=>s.studente===stu);
+      txt += `STUDENTE: ${stu} (${sue.length} sessioni)\n`;
+      sue.forEach(s=>{
+        const d = fmtDate(s.data);
+        const statusTxt = s.status==='disdetta' ? ' [DISDETTA]' : (s.status==='rinvio' ? ' [RINVIO]' : '');
+        txt += `  - ${d.full} ${s.ora}-${endTime(s.ora,s.durata)} [${s.tipo||'Tutorato'}]${statusTxt}\n`;
+        txt += `    Argomenti: ${s.argomenti||'—'}\n`;
+        if(s.note) txt += `    Note: ${s.note}\n`;
+      });
+      txt += `\n`;
+    });
+
+    if(sessions.length===0) txt += `Nessuna sessione registrata nel periodo selezionato.\n`;
+
+    return txt;
+  }
+
+  function renderReport(){
+    const sessions = getFilteredSessions();
+    const studenti = [...new Set(sessions.map(s=>s.studente))];
+    const totMin = sessions.reduce((acc,s)=>acc+Number(s.durata),0);
+
+    document.getElementById('reportStats').innerHTML = `
+      <div class="tut-stat"><div class="tut-stat-num">${sessions.length}</div><div class="tut-stat-label">Sessioni</div></div>
+      <div class="tut-stat"><div class="tut-stat-num">${studenti.length}</div><div class="tut-stat-label">Studenti</div></div>
+      <div class="tut-stat"><div class="tut-stat-num">${(totMin/60).toFixed(1)}</div><div class="tut-stat-label">Ore totali</div></div>
+    `;
+
+    document.getElementById('reportPreview').textContent = buildReportText();
+  }
+
+  window.copyReport = function(){
+    const txt = buildReportText();
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>toast('Report copiato negli appunti')).catch(()=>fallbackCopy(txt));
+    } else {
+      fallbackCopy(txt);
+    }
+  };
+
+  function fallbackCopy(txt){
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); toast('Report copiato negli appunti'); }
+    catch(e){ toast('Copia non riuscita'); }
+    document.body.removeChild(ta);
+  }
+
+  window.downloadReportPDF = function(){
+    try{
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit:'pt', format:'a4' });
+      const margin = 50;
+      let y = margin;
+      const lineH = 14;
+      const pageH = doc.internal.pageSize.getHeight();
+      const maxW = doc.internal.pageSize.getWidth() - margin*2;
+
+      const sessions = getFilteredSessions();
+      const from = document.getElementById('r-da').value;
+      const to = document.getElementById('r-a').value;
+      const periodo = (from||to) ? `${from?fmtDate(from).full:'inizio'} – ${to?fmtDate(to).full:'oggi'}` : 'tutto il periodo registrato';
+      const studenti = [...new Set(sessions.map(s=>s.studente))];
+      const totMin = sessions.reduce((acc,s)=>acc+Number(s.durata),0);
+
+      function addLine(text, opts={}){
+        const size = opts.size||10;
+        const style = opts.style||'normal';
+        doc.setFontSize(size);
+        doc.setFont('helvetica', style);
+        const wrapped = doc.splitTextToSize(text, maxW);
+        wrapped.forEach(line=>{
+          if(y > pageH - margin){ doc.addPage(); y = margin; }
+          doc.text(line, margin, y);
+          y += (opts.lineH||lineH);
+        });
+      }
+
+      addLine('Report Attività di Tutorato', {size:16, style:'bold', lineH:20});
+      addLine('Università degli Studi del Sannio', {size:10, style:'italic'});
+      addLine('A cura di: Dott.ssa Laura Scialò (collaboratrice del Prof. Cavuoto)', {size:10});
+      addLine(`Periodo: ${periodo}`, {size:10});
+      addLine(`Destinatario: Prof. Cavuoto`, {size:10});
+      addLine(`Generato il: ${new Date().toLocaleDateString('it-IT')}`, {size:10});
+      y += 6;
+      doc.setDrawColor(28,37,102);
+      doc.line(margin, y, doc.internal.pageSize.getWidth()-margin, y);
+      y += 18;
+
+      addLine(`Sintesi: ${sessions.length} sessioni · ${studenti.length} studenti · ${(totMin/60).toFixed(1)} ore totali`, {size:11, style:'bold', lineH:18});
+      y += 6;
+
+      if(sessions.length===0){
+        addLine('Nessuna sessione registrata nel periodo selezionato.', {size:10});
+      }
+
+      studenti.forEach(stu=>{
+        const sue = sessions.filter(s=>s.studente===stu);
+        if(y > pageH - margin - 30){ doc.addPage(); y = margin; }
+        y += 4;
+        addLine(`${stu}  (${sue.length} sessioni)`, {size:12, style:'bold', lineH:16});
+        sue.forEach(s=>{
+          const d = fmtDate(s.data);
+          const statusTxt = s.status==='disdetta' ? '  [DISDETTA]' : (s.status==='rinvio' ? '  [RINVIO]' : '');
+          addLine(`${d.full}  ${s.ora}-${endTime(s.ora,s.durata)}  [${s.tipo||'Tutorato'}]${statusTxt}`, {size:9.5, style:'bold', lineH:13});
+          addLine(`Argomenti: ${s.argomenti||'—'}`, {size:9.5, lineH:13});
+          if(s.note) addLine(`Note: ${s.note}`, {size:9.5, lineH:13});
+          y += 4;
+        });
+        y += 4;
+      });
+
+      const from2 = from||'inizio', to2 = to||'oggi';
+      doc.save(`report-tutorato_${from2}_${to2}.pdf`);
+      toast('PDF generato');
+    }catch(e){
+      console.error(e);
+      toast('Errore nella generazione del PDF');
+    }
+  };
+
+  function renderAll(){
+    renderSessions();
+    renderStudentList();
+    if(state.panel==='report') renderReport();
+  }
+
+  // init
+  loadThemePref();
+  loadAll();
+
+})();
+</script>
+
+</body>
+</html>
